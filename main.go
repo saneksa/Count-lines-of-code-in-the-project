@@ -12,10 +12,10 @@ import (
 	"sync"
 )
 
-var IGNORE_FOLDERS = [7]string{".git", ".idea", "node_modules", "_release", ".vscode", "package-lock.json", "README.md"}
+var ignoreList = [7]string{".git", ".idea", "node_modules", "_release", ".vscode", "package-lock.json", "README.md"}
 
 func checkFolders(path string) bool {
-	for _, folder := range IGNORE_FOLDERS {
+	for _, folder := range ignoreList {
 		var pattern = regexp.MustCompile(folder)
 		if match := pattern.FindAllStringIndex(path, -1); len(match) > 0 {
 			return true
@@ -49,7 +49,17 @@ func fileReader (file string, wg *sync.WaitGroup, countChan chan int) {
 	}
 	temp := strings.Split(string(f), "\n")
 	countChan <- len(temp) - 1
+}
 
+func printTable(counter int)  {
+	data := [][]string {
+		{"Strings in project", strconv.Itoa(counter)},
+	}
+	table := tablewriter.NewWriter(os.Stdout)
+	for _, v := range data {
+		table.Append(v)
+	}
+	table.Render()
 }
 
 
@@ -69,14 +79,5 @@ func main() {
 		sum+= <-countChan
 	}
 	wg.Wait()
-
-	data := [][]string {
-		{"Strings in project", strconv.Itoa(sum)},
-	}
-	table := tablewriter.NewWriter(os.Stdout)
-	for _, v := range data {
-		table.Append(v)
-	}
-	table.Render()
-
+	printTable(sum)
  }
